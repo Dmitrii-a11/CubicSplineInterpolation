@@ -30,11 +30,6 @@ void TDMA::calc(const std::vector<double>& a,
 
 	for (size_t i = n - 1; i > 1; --i)
 		result[i - 1] = alpha[i] * result[i] + beta[i];
-
-	std::cout << "c:\n";
-	for (double value : result)
-		std::cout << value << ' ';
-	std::cout << "***\n";
 }
 
 void TDMA::calc_alpha_beta(const std::vector<double>& a,

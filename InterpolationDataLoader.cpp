@@ -9,9 +9,7 @@ std::vector<std::vector<double>> InterpolationDataLoader::interpolationData
 
 bool InterpolationDataLoader::loadInterpolationData(const std::wstring& fileName)
 {
-    std::wifstream fin(fileName);
-    std::vector<double> xy(2);
-
+    std::wifstream fin(getCurrenDirectory() + fileName);
     std::vector<double> xVector, yVector;
 
     if (fin.is_open())
@@ -19,13 +17,6 @@ bool InterpolationDataLoader::loadInterpolationData(const std::wstring& fileName
         while (!fin.eof())
         {
             double x, y;
-
-            //fin >> x >> y;
-            //if (!fin.fail())
-            //{
-            //    xVector.push_back(x);
-            //    yVector.push_back(y);
-            //}
 
             fin >> x;
             if (!fin.fail())

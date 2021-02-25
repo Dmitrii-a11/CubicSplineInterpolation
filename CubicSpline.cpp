@@ -11,7 +11,7 @@
 
 int main()
 {
-    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline");
+    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline/");
     bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY.txt");
 
     if (!isLoaded)
@@ -25,8 +25,6 @@ int main()
     const std::vector<double>& x = InterpolationDataLoader::interpolationDataX();
     const std::vector<double>& y = InterpolationDataLoader::interpolationDataY();
 
-    cubicSplineInterpolator.set_x(x);
-    cubicSplineInterpolator.set_y(y);
     cubicSplineInterpolator.errorsHandler.setErrorsHandlerDelegate([](void* object)
         {
             ErrorsHandler* eh = static_cast<ErrorsHandler*>(object);
@@ -34,6 +32,9 @@ int main()
             for (std::string error : errors)
                 std::cout << error << '\n';
         });
+
+    cubicSplineInterpolator.set_x(x);
+    cubicSplineInterpolator.set_y(y);
 
     std::thread interpolationThread([&cubicSplineInterpolator]()
         {

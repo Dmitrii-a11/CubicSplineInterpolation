@@ -1,8 +1,10 @@
 #include "CubicSplineInterpolator.h"           
-#include <new>
+//#include <new>
+
 void CubicSplineInterpolator::set_x(const std::vector<double>& x)
 {
-	grid.set_x(x);
+    if (Grid::InitGridErrors::BAD_ALLOC == grid.set_x(x))
+        errorsHandler.pushBackError("cannot x data, bad_alloc");
 }
 
 void CubicSplineInterpolator::set_y(const std::vector<double>& y)
@@ -13,7 +15,8 @@ void CubicSplineInterpolator::set_y(const std::vector<double>& y)
     }
     catch (std::bad_alloc& ex)
     {
-        errorsHandler.pushBackError("cannot initialize cubic spline data, bad_alloc");
+        (void)ex;
+        errorsHandler.pushBackError("cannot y data, bad_alloc");
     }
 }
 
@@ -46,8 +49,8 @@ void CubicSplineInterpolator::initialize()
     case Grid::InitGridErrors::EMPTY_X:
         errorsHandler.pushBackError("x is empty");
         break;
-    case Grid::InitGridErrors::UNEXPECTED_ERROR:
-        errorsHandler.pushBackError("an unexpected error has occured");
+    case Grid::InitGridErrors::BAD_ALLOC:
+        errorsHandler.pushBackError("bad allocation has occured");
         break;
     default:
         break;
@@ -73,6 +76,7 @@ void CubicSplineInterpolator::initialize()
     }
     catch (std::bad_alloc& ex)
     {
+        (void)ex;
         errorsHandler.pushBackError("cannot initialize cubic spline data, bad_alloc");
         errorsHandler.invoke(&errorsHandler);
         return;
@@ -111,10 +115,10 @@ double CubicSplineInterpolator::interpolate(double _x)
                 return y[n - 1];
 
             _a = y[i];
-            _d = (m[i] - m[i - 1]) / h[i-1];
-            _b = (m[i] * h[i-1]) / 2.0 - (_d * h[i-1] * h[i-1]) / 6.0 + (y[i] - y[i - 1]) / h[i-1];
+            _d = (m[i] - m[i - 1]) / h[i - 1];
+            _b = (m[i] * h[i - 1]) / 2.0 - (_d * h[i - 1] * h[i - 1]) / 6.0 + (y[i] - y[i - 1]) / h[i - 1];
 
-            return _a + _b * (_x - x[i]) + (m[i]/2.0) * (_x - x[i]) * (_x - x[i]) + (_d/6.0) * (_x - x[i]) * (_x - x[i]) * (_x - x[i]);
+            return _a + _b * (_x - x[i]) + (m[i] / 2.0) * (_x - x[i]) * (_x - x[i]) + (_d / 6.0) * (_x - x[i]) * (_x - x[i]) * (_x - x[i]);
         }
     }
 

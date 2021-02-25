@@ -8,9 +8,9 @@
 class Grid
 {
 public:
-	enum class InitGridErrors { EMPTY_X, NON_MONOTONIC_DATA, NO_ERRORS, UNEXPECTED_ERROR };
+	enum class InitGridErrors { EMPTY_X, NON_MONOTONIC_DATA, BAD_ALLOC, NO_ERRORS };
 
-	void set_x(const std::vector<double>& _x)
+	InitGridErrors set_x(const std::vector<double>& _x)
 	{
 		try
 		{
@@ -19,8 +19,10 @@ public:
 		catch (std::bad_alloc& ex)
 		{
 			(void)ex;
-			printErrorToConsole("cannot assign x, bad_alloc");
+			return InitGridErrors::BAD_ALLOC;
 		}
+
+		return InitGridErrors::NO_ERRORS;
 	}
 
 	InitGridErrors initializeGrid();
