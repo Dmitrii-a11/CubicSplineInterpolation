@@ -14,6 +14,9 @@
 class CubicSplineInterpolator
 {
 public:
+	CubicSplineInterpolator() : initialized{ false }, _a{ 0.0 }, _b{ 0.0 }, _d{ 0.0 }
+	{}
+
 	void set_x(const std::vector<double>& x);
 	void set_y(const std::vector<double>& x);
 	void initialize();
@@ -30,7 +33,7 @@ private:
 	TDMA TDMA_algorith;
 	std::vector<double> y;
 	std::vector<double> m;
-	bool initialized = false;
+	bool initialized;
 	double _a, _b, _d;
 
 	void createCoefficients(std::vector<double>& a,
