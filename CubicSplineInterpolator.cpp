@@ -1,5 +1,10 @@
 #include "CubicSplineInterpolator.h"           
-//#include <new>
+
+CubicSplineInterpolator::CubicSplineInterpolator() : 
+    initialized{ false }, _a{ 0.0 }, _b{ 0.0 }, _d{ 0.0 },
+    firstOrder_a{ 0.0 }, firstOrder_b{ 0.0 }, secondOrder_a{ 0.0 },
+    secondOrder_b{ 0.0 }, isDerivatives{ 0.0 }
+{}
 
 void CubicSplineInterpolator::set_x(const std::vector<double>& x)
 {
@@ -18,6 +23,15 @@ void CubicSplineInterpolator::set_y(const std::vector<double>& y)
         (void)ex;
         errorsHandler.pushBackError("cannot y data, bad_alloc");
     }
+}
+
+void CubicSplineInterpolator::setDerivatives(double firstOrder_a, double firstOrder_b, double secondOrder_a, double secondOrder_b)
+{
+    this->firstOrder_a = firstOrder_a;
+    this->firstOrder_b = firstOrder_b;
+    this->secondOrder_a = secondOrder_a;
+    this->secondOrder_b = secondOrder_b;
+    isDerivatives = true;
 }
 
 void CubicSplineInterpolator::initialize()
@@ -39,58 +53,15 @@ void CubicSplineInterpolator::initialize()
         return;
     }
 
-    Grid::InitGridErrors initGridErrors = grid.initializeGrid();
-
-    switch (initGridErrors)
+    if (!initializeGrid())
     {
-    case Grid::InitGridErrors::NON_MONOTONIC_DATA:
-        errorsHandler.pushBackError("x is non monotonic");
-        break;
-    case Grid::InitGridErrors::EMPTY_X:
-        errorsHandler.pushBackError("x is empty");
-        break;
-    case Grid::InitGridErrors::BAD_ALLOC:
-        errorsHandler.pushBackError("bad allocation has occured");
-        break;
-    default:
-        break;
-    }
-
-    if (initGridErrors != Grid::InitGridErrors::NO_ERRORS)
-    {
-        errorsHandler.pushBackError("cannot initialize grid");
-        errorsHandler.invoke(&errorsHandler);
-        return;
-    }
-
-    size_t n = grid.get_n();
-    std::vector<double> a, b, c, d;
-
-    try
-    {
-        a.resize(n);
-        b.resize(n);
-        c.resize(n);
-        d.resize(n);
-        m.resize(y.size());
-    }
-    catch (std::bad_alloc& ex)
-    {
-        (void)ex;
-        errorsHandler.pushBackError("cannot initialize cubic spline data, bad_alloc");
         errorsHandler.invoke(&errorsHandler);
         return;
     }
     
-    createCoefficients(a, b, c, d);
-    TDMA_algorith.calc(a, b, c, d, m);
-
-    if (TDMA_algorith.errors.size() > 0)
+    if (!get_m())
     {
-        for (auto& error : TDMA_algorith.errors)
-            errorsHandler.pushBackError(error);
         errorsHandler.invoke(&errorsHandler);
-
         return;
     }
 
@@ -116,7 +87,11 @@ double CubicSplineInterpolator::interpolate(double _x)
 
             _a = y[i];
             _d = (m[i] - m[i - 1]) / h[i - 1];
-            _b = (m[i] * h[i - 1]) / 2.0 - (_d * h[i - 1] * h[i - 1]) / 6.0 + (y[i] - y[i - 1]) / h[i - 1];
+
+            if (isDerivatives && i == n-1)
+                _b = firstOrder_b;
+            else
+                _b = (m[i] * h[i - 1]) / 2.0 - (_d * h[i - 1] * h[i - 1]) / 6.0 + (y[i] - y[i - 1]) / h[i - 1];
 
             return _a + _b * (_x - x[i]) + (m[i] / 2.0) * (_x - x[i]) * (_x - x[i]) + (_d / 6.0) * (_x - x[i]) * (_x - x[i]) * (_x - x[i]);
         }
@@ -151,4 +126,106 @@ void CubicSplineInterpolator::createCoefficients(std::vector<double>& a,
 
     b[0] = 2.0 * c[0];
     b[n - 1] = 2.0 * a[n - 1];
+}
+
+bool CubicSplineInterpolator::initializeGrid()
+{
+    Grid::InitGridErrors initGridErrors = grid.initializeGrid();
+
+    switch (initGridErrors)
+    {
+    case Grid::InitGridErrors::NON_MONOTONIC_DATA:
+        errorsHandler.pushBackError("x is non monotonic");
+        break;
+    case Grid::InitGridErrors::EMPTY_X:
+        errorsHandler.pushBackError("x is empty");
+        break;
+    case Grid::InitGridErrors::BAD_ALLOC:
+        errorsHandler.pushBackError("bad allocation has occured");
+        break;
+    default:
+        break;
+    }
+
+    if (initGridErrors != Grid::InitGridErrors::NO_ERRORS)
+    {
+        errorsHandler.pushBackError("cannot initialize grid");       
+        return false;
+    }
+
+    return true;
+}
+
+bool CubicSplineInterpolator::getResultFromTDMA()
+{
+    size_t n{ grid.get_n() };
+    std::vector<double> a, b, c, d;
+
+    try
+    {
+        a.resize(n);
+        b.resize(n);
+        c.resize(n);
+        d.resize(n);
+        m.resize(n);
+    }
+    catch (std::bad_alloc& ex)
+    {
+        (void)ex;
+        errorsHandler.pushBackError("cannot initialize cubic spline data, bad_alloc");
+        
+        return false;
+    }
+
+    createCoefficients(a, b, c, d);
+    TDM_algorithm.calc(a, b, c, d, m);
+
+    if (TDM_algorithm.errors.size() > 0)
+    {
+        for (auto& error : TDM_algorithm.errors)
+            errorsHandler.pushBackError(error);
+
+        return false;
+    }
+    return true;
+}
+
+bool CubicSplineInterpolator::get_m()
+{
+    bool answer{ false };
+
+    if (isDerivatives)
+        answer = getResult();
+    else
+        answer = getResultFromTDMA();
+
+    return answer;
+}
+
+bool CubicSplineInterpolator::getResult()
+{
+    size_t n{ grid.get_n() };
+
+    try
+    {
+        m.resize(n);
+    }
+    catch (std::bad_alloc& ex)
+    {
+        (void)ex;
+        errorsHandler.pushBackError("cannot initialize cubic spline data, bad_alloc");
+
+        return false;
+    }
+
+    const std::vector<double>& h{ grid.get_h() };
+
+    m[0] = secondOrder_a;
+    m[1] = (6.0 / h[0]) * ((y[1] - y[0]) / h[0] - firstOrder_a) - 2.0 * secondOrder_a;
+    m[n - 1] = secondOrder_b;
+
+    for (size_t i = 1; i < n - 1; ++i)
+        m[i + 1] = (6.0 / h[i]) * ((y[i + 1] - y[i]) / h[i] - (y[i] - y[i - 1]) / h[i - 1]) - m[i - 1] - (2.0 / h[i]) * (h[i - 1] + h[i]) * m[i];
+
+    return true;
 }

@@ -11,8 +11,8 @@
 
 int main()
 {
-    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline/");
-    bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY.txt");
+    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Настольный/Documents/Visual Studio 2019/Projects/CubicSplineInterpolation/");
+    bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY парабола.txt");
 
     if (!isLoaded)
     {
@@ -35,21 +35,18 @@ int main()
 
     cubicSplineInterpolator.set_x(x);
     cubicSplineInterpolator.set_y(y);
+    cubicSplineInterpolator.setDerivatives(-4.0, 4.0, 2.0, 2.0);
 
-    std::thread interpolationThread([&cubicSplineInterpolator]()
-        {
-            cubicSplineInterpolator.initialize();
+    cubicSplineInterpolator.initialize();
 
-            if (cubicSplineInterpolator.isInitialized())
-            {
-                std::vector<double> x0{ -2.97,-2.805,-2.64,-2.475,-2.31,-2.145,-1.98,-1.815,-1.65,-1.485,-1.32,-1.155,-0.99,-0.825,-0.66,-0.495,-0.33,-0.165,0,0.165,0.33,0.495,0.66,0.825,0.99,1.155,1.32,1.485,1.65,1.815,1.98,2.145,2.31,2.475,2.64,2.805,2.97 };
+    if (cubicSplineInterpolator.isInitialized())
+    {
+        //std::vector<double> x0{ -2.97,-2.805,-2.64,-2.475,-2.31,-2.145,-1.98,-1.815,-1.65,-1.485,-1.32,-1.155,-0.99,-0.825,-0.66,-0.495,-0.33,-0.165,0,0.165,0.33,0.495,0.66,0.825,0.99,1.155,1.32,1.485,1.65,1.815,1.98,2.145,2.31,2.475,2.64,2.805,2.97 };
+        std::vector<double> x0{-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0};
+        for (double value : x0)
+            std::cout << cubicSplineInterpolator.interpolate(value) << std::endl;
 
-                for (double value : x0)
-                    std::cout << cubicSplineInterpolator.interpolate(value) << std::endl;
-
-            }
-        });
-    interpolationThread.join();
+    }
 
     system("pause");
     return 0;
