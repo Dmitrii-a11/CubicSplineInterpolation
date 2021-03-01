@@ -143,6 +143,7 @@
     <ClCompile Include="CubicSplineInterpolator.cpp" />
     <ClCompile Include="ErrorsHandler.cpp" />
     <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="HermitSplineInterpolator.cpp" />
     <ClCompile Include="InterpolationDataLoader.cpp" />
     <ClCompile Include="TDMA.cpp" />
   </ItemGroup>
@@ -150,7 +151,9 @@
     <ClInclude Include="CubicSplineInterpolator.h" />
     <ClInclude Include="ErrorsHandler.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="HermitSplineInterpolator.h" />
     <ClInclude Include="InterpolationDataLoader.h" />
+    <ClInclude Include="Interpolator.h" />
     <ClInclude Include="TDMA.h" />
   </ItemGroup>
   <ItemGroup>
