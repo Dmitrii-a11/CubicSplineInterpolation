@@ -8,19 +8,10 @@
 #include <thread>
 
 #include "CubicSplineInterpolator.h"
+#include "HermitSplineInterpolator.h"
 
-int main()
+void cubicSplineInterpolation()
 {
-    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline/");
-    bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY.txt");
-
-    if (!isLoaded)
-    {
-        std::cout << "Interpolation data is not loaded" << std::endl;
-        system("pause");
-        return 0;
-    }
-
     CubicSplineInterpolator cubicSplineInterpolator;
     const std::vector<double>& x = InterpolationDataLoader::interpolationDataX();
     const std::vector<double>& y = InterpolationDataLoader::interpolationDataY();
@@ -35,18 +26,57 @@ int main()
 
     cubicSplineInterpolator.set_x(x);
     cubicSplineInterpolator.set_y(y);
-    cubicSplineInterpolator.setDerivatives(-4.0, 4.0, 2.0, 2.0);
+    //cubicSplineInterpolator.setDerivatives(-4.0, 4.0, 2.0, 2.0);
 
     cubicSplineInterpolator.initialize();
 
     if (cubicSplineInterpolator.isInitialized())
     {
         //std::vector<double> x0{ -2.97,-2.805,-2.64,-2.475,-2.31,-2.145,-1.98,-1.815,-1.65,-1.485,-1.32,-1.155,-0.99,-0.825,-0.66,-0.495,-0.33,-0.165,0,0.165,0.33,0.495,0.66,0.825,0.99,1.155,1.32,1.485,1.65,1.815,1.98,2.145,2.31,2.475,2.64,2.805,2.97 };
-        std::vector<double> x0{-2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0};
+        std::vector<double> x0{ -2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0 };
+
+        std::cout.imbue(std::locale("rus"));
         for (double value : x0)
             std::cout << cubicSplineInterpolator.interpolate(value) << std::endl;
 
     }
+}
+
+void hermiteSplineInterpolation()
+{
+    HermitSplineInterpolator hermitSplineInterpolator;
+    const std::vector<double>& x = InterpolationDataLoader::interpolationDataX();
+    const std::vector<double>& y = InterpolationDataLoader::interpolationDataY();
+
+    hermitSplineInterpolator.set_x(x);
+    hermitSplineInterpolator.set_y(y);
+    hermitSplineInterpolator.setBoundaryConditions(-4.0, 4.0);
+    hermitSplineInterpolator.initialize();
+
+    if (hermitSplineInterpolator.isInitialized())
+    {
+        std::vector<double> x0{ -2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0 };
+
+        std::cout.imbue(std::locale("rus"));
+        for (double value : x0)
+            std::cout << hermitSplineInterpolator.interpolate(value) << std::endl;
+    }
+}
+
+int main()
+{
+    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline/");
+    bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY.txt");
+
+    if (!isLoaded)
+    {
+        std::cout << "Interpolation data is not loaded" << std::endl;
+        system("pause");
+        return 0;
+    }
+
+    //cubicSplineInterpolation();
+    hermiteSplineInterpolation();
 
     system("pause");
     return 0;

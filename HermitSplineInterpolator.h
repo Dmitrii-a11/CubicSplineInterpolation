@@ -17,6 +17,7 @@ public:
 
 	void setBoundaryConditions(double der_a, double der_b);
 	void initialize();
+	bool isInitialized();
 
 private:
 	HermitSplineInterpolatorP* imp;
