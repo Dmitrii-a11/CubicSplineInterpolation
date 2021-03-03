@@ -8,7 +8,7 @@
 #include <thread>
 
 #include "CubicSplineInterpolator.h"
-#include "HermitSplineInterpolator.h"
+#include "HermiteSplineInterpolator.h"
 
 void cubicSplineInterpolation()
 {
@@ -44,22 +44,22 @@ void cubicSplineInterpolation()
 
 void hermiteSplineInterpolation()
 {
-    HermitSplineInterpolator hermitSplineInterpolator;
+    HermiteSplineInterpolator hermiteSplineInterpolator;
     const std::vector<double>& x = InterpolationDataLoader::interpolationDataX();
     const std::vector<double>& y = InterpolationDataLoader::interpolationDataY();
 
-    hermitSplineInterpolator.set_x(x);
-    hermitSplineInterpolator.set_y(y);
-    hermitSplineInterpolator.setBoundaryConditions(-4.0, 4.0);
-    hermitSplineInterpolator.initialize();
+    hermiteSplineInterpolator.set_x(x);
+    hermiteSplineInterpolator.set_y(y);
+    hermiteSplineInterpolator.setBoundaryConditions(-4.0, 4.0);
+    hermiteSplineInterpolator.initialize();
 
-    if (hermitSplineInterpolator.isInitialized())
+    if (hermiteSplineInterpolator.isInitialized())
     {
         std::vector<double> x0{ -2.0,-1.5,-1.0,-0.5,0.0,0.5,1.0,1.5,2.0 };
 
         std::cout.imbue(std::locale("rus"));
         for (double value : x0)
-            std::cout << hermitSplineInterpolator.interpolate(value) << std::endl;
+            std::cout << hermiteSplineInterpolator.interpolate(value) << std::endl;
     }
 }
 

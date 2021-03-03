@@ -1,11 +1,11 @@
-#include "HermitSplineInterpolator.h"
+#include "HermiteSplineInterpolator.h"
 #include "Grid.h"
 #include "ErrorsHandler.h"
 #include "TDMA.h"
 
-struct HermitSplineInterpolatorP
+struct HermiteSplineInterpolatorP
 {
-	HermitSplineInterpolatorP() :
+	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
 		initialized{ false }
 	{}
@@ -157,23 +157,23 @@ struct HermitSplineInterpolatorP
 	bool initialized;
 };
 
-HermitSplineInterpolator::HermitSplineInterpolator()
+HermiteSplineInterpolator::HermiteSplineInterpolator()
 {
-	imp = new HermitSplineInterpolatorP;
+	imp = new HermiteSplineInterpolatorP;
 }
 
-HermitSplineInterpolator::~HermitSplineInterpolator()
+HermiteSplineInterpolator::~HermiteSplineInterpolator()
 {
 	delete imp;
 }
 
-void HermitSplineInterpolator::set_x(const std::vector<double>& x)
+void HermiteSplineInterpolator::set_x(const std::vector<double>& x)
 {
 	if (Grid::InitGridErrors::BAD_ALLOC == imp->grid.set_x(x))
 		imp->errorsHandler.pushBackError("cannot x data, bad_alloc");
 }
 
-void HermitSplineInterpolator::set_y(const std::vector<double>& y)
+void HermiteSplineInterpolator::set_y(const std::vector<double>& y)
 {
 	try
 	{
@@ -186,7 +186,7 @@ void HermitSplineInterpolator::set_y(const std::vector<double>& y)
 	}
 }
 
-double HermitSplineInterpolator::interpolate(double _x)
+double HermiteSplineInterpolator::interpolate(double _x)
 {
 	if (imp->initialized)
 	{
@@ -216,19 +216,19 @@ double HermitSplineInterpolator::interpolate(double _x)
 	return 0.0;
 }
 
-void HermitSplineInterpolator::setBoundaryConditions(double der_a, double der_b)
+void HermiteSplineInterpolator::setBoundaryConditions(double der_a, double der_b)
 {
 	imp->der_a = der_a;
 	imp->der_b = der_b;
 	imp->isDerivatives = true;
 }
 
-void HermitSplineInterpolator::initialize()
+void HermiteSplineInterpolator::initialize()
 {
 	imp->initialize();
 }
 
-bool HermitSplineInterpolator::isInitialized()
+bool HermiteSplineInterpolator::isInitialized()
 {
 	return imp->initialized;
 }

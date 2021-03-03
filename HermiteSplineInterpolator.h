@@ -3,13 +3,13 @@
 
 #include "Interpolator.h"
 
-struct HermitSplineInterpolatorP;
+struct HermiteSplineInterpolatorP;
 
-class HermitSplineInterpolator : public Iinterpolator
+class HermiteSplineInterpolator : public Iinterpolator
 {
 public:
-	HermitSplineInterpolator();
-	virtual ~HermitSplineInterpolator();
+	HermiteSplineInterpolator();
+	virtual ~HermiteSplineInterpolator();
 
 	virtual void set_x(const std::vector<double>& x) override;
 	virtual void set_y(const std::vector<double>& y) override;
@@ -20,7 +20,7 @@ public:
 	bool isInitialized();
 
 private:
-	HermitSplineInterpolatorP* imp;
+	HermiteSplineInterpolatorP* imp;
 };
 
 #endif //HERMITSPLINEINTERPOLATOR_H
