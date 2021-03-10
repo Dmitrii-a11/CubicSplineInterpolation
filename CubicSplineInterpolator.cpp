@@ -1,4 +1,7 @@
-#include "CubicSplineInterpolator.h"           
+#include "CubicSplineInterpolator.h"
+#include "Grid.h"
+#include "TDMA.h"
+#include "ErrorsHandler.h"
 
 struct CubicSplineInterpolatorP
 {

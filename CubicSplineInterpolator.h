@@ -1,29 +1,30 @@
 #ifndef CUBICSPLINEINTERPOLATOR_H
 #define CUBICSPLINEINTERPOLATOR_H
 
-#include <vector>
-#include <fstream>
-#include <string>
+//#include <vector>
+//#include <fstream>
+//#include <string>
 #include <functional>
-
-#include "Grid.h"
-#include "TDMA.h"
-#include "InterpolationDataLoader.h"
-#include "ErrorsHandler.h"
+//
+//#include "Grid.h"
+//#include "TDMA.h"
+//#include "InterpolationDataLoader.h"
+//#include "ErrorsHandler.h"
+#include "Interpolator.h"
 
 struct CubicSplineInterpolatorP;
 
-class CubicSplineInterpolator
+class CubicSplineInterpolator : public Iinterpolator
 {
 public:
 	CubicSplineInterpolator();
-	~CubicSplineInterpolator();
+	virtual ~CubicSplineInterpolator();
 
-	void set_x(const std::vector<double>& x);
-	void set_y(const std::vector<double>& x);
+	virtual void set_x(const std::vector<double>& x) override;
+	virtual void set_y(const std::vector<double>& x) override;
 	void setDerivatives(double firstOrder_a, double firstOrder_b, double secondOrder_a, double secondOrder_b);
 	void initialize();
-	double interpolate(double x);
+	virtual double interpolate(double x) override;
 	bool isInitialized() const;
 	void setErrorsHandlerDelegate(std::function<void(void* object)> _delegate);
 

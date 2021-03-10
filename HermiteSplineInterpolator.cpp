@@ -198,9 +198,9 @@ double HermiteSplineInterpolator::interpolate(double _x)
 		if (_x<x[0] || _x>x[n - 1])
 			return 0.0;
 
-		for (size_t i = 0; i < n-1; ++i)
+		for (size_t i = 0; i < n - 1; ++i)
 		{
-			if (_x > x[i+1])
+			if (_x > x[i + 1])
 				continue;
 			if (_x == x[0])
 				return imp->y[0];
@@ -231,4 +231,9 @@ void HermiteSplineInterpolator::initialize()
 bool HermiteSplineInterpolator::isInitialized()
 {
 	return imp->initialized;
+}
+
+void HermiteSplineInterpolator::setErrorsHandlerDelegate(std::function<void(void* object)> _delegate)
+{
+	imp->errorsHandler.setErrorsHandlerDelegate(_delegate);
 }

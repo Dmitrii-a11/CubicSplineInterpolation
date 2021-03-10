@@ -9,6 +9,8 @@
 
 #include "CubicSplineInterpolator.h"
 #include "HermiteSplineInterpolator.h"
+#include "InterpolationDataLoader.h"
+#include "ErrorsHandler.h"
 
 void cubicSplineInterpolation()
 {
@@ -48,6 +50,14 @@ void hermiteSplineInterpolation()
     const std::vector<double>& x = InterpolationDataLoader::interpolationDataX();
     const std::vector<double>& y = InterpolationDataLoader::interpolationDataY();
 
+    hermiteSplineInterpolator.setErrorsHandlerDelegate([](void* object)
+        {
+            ErrorsHandler* eh = static_cast<ErrorsHandler*>(object);
+            std::vector<std::string> errors = eh->getErrors();
+
+            for (auto& error : errors)
+                std::cout << error << '\n';
+        });
     hermiteSplineInterpolator.set_x(x);
     hermiteSplineInterpolator.set_y(y);
     hermiteSplineInterpolator.setBoundaryConditions(-4.0, 4.0);
@@ -65,8 +75,9 @@ void hermiteSplineInterpolation()
 
 int main()
 {
-    InterpolationDataLoader::setCurrentDirectory(L"C:/Users/Ноут/Documents/Visual Studio 2019/Projects/CubicSpline/CubicSpline/");
-    bool isLoaded = InterpolationDataLoader::loadInterpolationData(L"XY.txt");
+    std::wstring currentWorkingDirectory{ InterpolationDataLoader::getDefaultCurrentDirectory() };
+    std::wstring fileName(L"XY.txt");
+    bool isLoaded = InterpolationDataLoader::loadInterpolationData(currentWorkingDirectory + fileName);
 
     if (!isLoaded)
     {

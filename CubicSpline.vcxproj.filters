@@ -42,7 +42,7 @@
     <ClCompile Include="ErrorsHandler.cpp">
       <Filter>ErrorHandler\sources</Filter>
     </ClCompile>
-    <ClCompile Include="HermitSplineInterpolator.cpp">
+    <ClCompile Include="HermiteSplineInterpolator.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,16 +56,16 @@
     <ClInclude Include="CubicSplineInterpolator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="InterpolationDataLoader.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="ErrorsHandler.h">
       <Filter>ErrorHandler\headers</Filter>
     </ClInclude>
-    <ClInclude Include="HermitSplineInterpolator.h">
+    <ClInclude Include="Interpolator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Interpolator.h">
+    <ClInclude Include="HermiteSplineInterpolator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="InterpolationDataLoader.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

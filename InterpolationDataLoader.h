@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 
+
 struct InterpolationDataLoader
 {
     static void setCurrentDirectory(const std::wstring& path)
@@ -16,6 +17,8 @@ struct InterpolationDataLoader
     {
         return currentDirectory;
     }
+
+    static std::wstring getDefaultCurrentDirectory();
 
     static bool loadInterpolationData(const std::wstring& fileName);
 

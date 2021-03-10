@@ -2,6 +2,7 @@
 #define HERMITSPLINEINTERPOLATOR_H
 
 #include "Interpolator.h"
+#include <functional>
 
 struct HermiteSplineInterpolatorP;
 
@@ -18,6 +19,7 @@ public:
 	void setBoundaryConditions(double der_a, double der_b);
 	void initialize();
 	bool isInitialized();
+	void setErrorsHandlerDelegate(std::function<void(void* object)> _delegate);
 
 private:
 	HermiteSplineInterpolatorP* imp;

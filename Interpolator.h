@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "Grid.h"
-
 class Iinterpolator
 {
 public:
