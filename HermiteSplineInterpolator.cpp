@@ -7,7 +7,7 @@ struct HermiteSplineInterpolatorP
 {
 	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
-		initialized{ false }
+		initialized{ false }, isWeights{ false }, weightsCalculating{ false }
 	{}
 
 	bool initializeGrid()
@@ -83,15 +83,24 @@ struct HermiteSplineInterpolatorP
 			der_b = (y[n - 1] - y[n - 2]) / h[n - 2];
 		}
 	}
+	void get_w()
+	{}
 	bool get_m()
 	{
 		size_t n{ grid.get_n() };
 		std::vector<double> a, b, c, d;
 
+		if (weightsCalculating)
+		{
+			get_w();
+			isWeights = true;
+		}
+
 		try
 		{
 			m.resize(n);
-			w = std::move(std::vector<double>(n - 1, 1.0));
+			if(!isWeights)
+				w = std::move(std::vector<double>(n - 1, 1.0));
 			a.resize(n);
 			b.resize(n);
 			c.resize(n);
@@ -124,9 +133,9 @@ struct HermiteSplineInterpolatorP
 		std::vector<double>& c,
 		std::vector<double>& d)
 	{
-		const std::vector<double>& h = grid.get_h();
-		size_t n = a.size();
-		size_t nn = h.size();
+		const std::vector<double>& h{ grid.get_h() };
+		size_t n{ a.size() };
+		size_t nn{ h.size() };
 
 		a[0] = 0.0;
 		a[n - 1] = (w[nn - 2] * h[nn - 1]) / (w[nn - 2] * h[nn - 1] + w[nn - 1] * h[nn - 2]);
@@ -155,6 +164,7 @@ struct HermiteSplineInterpolatorP
 	ErrorsHandler errorsHandler;
 	bool isDerivatives;
 	bool initialized;
+	bool isWeights, weightsCalculating;
 };
 
 HermiteSplineInterpolator::HermiteSplineInterpolator()
@@ -170,7 +180,7 @@ HermiteSplineInterpolator::~HermiteSplineInterpolator()
 void HermiteSplineInterpolator::set_x(const std::vector<double>& x)
 {
 	if (Grid::InitGridErrors::BAD_ALLOC == imp->grid.set_x(x))
-		imp->errorsHandler.pushBackError("cannot x data, bad_alloc");
+		imp->errorsHandler.pushBackError("cannot set x data, bad_alloc");
 }
 
 void HermiteSplineInterpolator::set_y(const std::vector<double>& y)
@@ -182,7 +192,7 @@ void HermiteSplineInterpolator::set_y(const std::vector<double>& y)
 	catch (std::bad_alloc& ex)
 	{
 		(void)ex;
-		imp->errorsHandler.pushBackError("cannot y data, bad_alloc");
+		imp->errorsHandler.pushBackError("cannot set y data, bad_alloc");
 	}
 }
 
@@ -190,8 +200,8 @@ double HermiteSplineInterpolator::interpolate(double _x)
 {
 	if (imp->initialized)
 	{
-		const std::vector<double>& x = imp->grid.get_x();
-		const std::vector<double>& h = imp->grid.get_h();
+		const std::vector<double>& x{ imp->grid.get_x() };
+		const std::vector<double>& h{ imp->grid.get_h() };
 		size_t n{ x.size() };
 		double t{ 0.0 };
 
@@ -236,4 +246,37 @@ bool HermiteSplineInterpolator::isInitialized()
 void HermiteSplineInterpolator::setErrorsHandlerDelegate(std::function<void(void* object)> _delegate)
 {
 	imp->errorsHandler.setErrorsHandlerDelegate(_delegate);
+}
+
+void HermiteSplineInterpolator::setWeights(const std::vector<double>& w)
+{
+	try
+	{
+		imp->w = w;
+		imp->isWeights = true;
+	}
+	catch (std::bad_alloc& ex)
+	{
+		(void)ex;
+		imp->errorsHandler.pushBackError("cannot set weights, bad_alloc");
+	}
+}
+
+void HermiteSplineInterpolator::setWeights(std::vector<double>&& w)
+{
+	try
+	{
+		imp->w = std::move(w);
+		imp->isWeights = true;
+	}
+	catch (std::bad_alloc& ex)
+	{
+		(void)ex;
+		imp->errorsHandler.pushBackError("cannot set weights, bad_alloc");
+	}
+}
+
+void HermiteSplineInterpolator::setWeightsCalculating(bool value)
+{
+	imp->weightsCalculating = value;
 }

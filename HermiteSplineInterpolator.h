@@ -1,8 +1,9 @@
 #ifndef HERMITSPLINEINTERPOLATOR_H
 #define HERMITSPLINEINTERPOLATOR_H
 
-#include "Interpolator.h"
 #include <functional>
+
+#include "Interpolator.h"
 
 struct HermiteSplineInterpolatorP;
 
@@ -20,6 +21,9 @@ public:
 	void initialize();
 	bool isInitialized();
 	void setErrorsHandlerDelegate(std::function<void(void* object)> _delegate);
+	void setWeights(const std::vector<double>& w);
+	void setWeights(std::vector<double>&& w);
+	void setWeightsCalculating(bool value);
 
 private:
 	HermiteSplineInterpolatorP* imp;
