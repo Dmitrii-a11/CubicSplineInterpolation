@@ -20,7 +20,7 @@ Grid::Grid::InitGridErrors Grid::Grid::initializeGrid()
 	for (size_t i = 0; i < n - 1; ++i)
 	{
 		if (x[i + 1] <= x[i])
-			return InitGridErrors::NON_MONOTONIC_DATA;
+			return InitGridErrors::NOT_ASCENDING;
 		h[i] = x[i + 1] - x[i];
 	}
 

@@ -8,7 +8,7 @@
 class Grid
 {
 public:
-	enum class InitGridErrors { EMPTY_X, NON_MONOTONIC_DATA, BAD_ALLOC, NO_ERRORS };
+	enum class InitGridErrors { EMPTY_X, NOT_ASCENDING, BAD_ALLOC, NO_ERRORS };
 
 	InitGridErrors set_x(const std::vector<double>& _x)
 	{

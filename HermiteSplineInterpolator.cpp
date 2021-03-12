@@ -16,8 +16,8 @@ struct HermiteSplineInterpolatorP
 
 		switch (initGridErrors)
 		{
-		case Grid::InitGridErrors::NON_MONOTONIC_DATA:
-			errorsHandler.pushBackError("x is non monotonic");
+		case Grid::InitGridErrors::NOT_ASCENDING:
+			errorsHandler.pushBackError("x is not ascending");
 			break;
 		case Grid::InitGridErrors::EMPTY_X:
 			errorsHandler.pushBackError("x is empty");
