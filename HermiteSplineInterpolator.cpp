@@ -84,7 +84,73 @@ struct HermiteSplineInterpolatorP
 		}
 	}
 	void get_w()
-	{}
+	{
+		size_t beginIndexAsc{ 0 }, beginIndexDes{ 0 }, endIndexAsc{ 0 }, endIndexDes{ 0 };
+		bool isAscending{ false }, isDescending{ false }, beginFound{ false }, endFound{ false };
+		size_t n{ grid.get_n() - 1 };
+
+		for (size_t i = 0; i < n; ++i)
+		{
+			if (y[i + 1] > y[i])
+			{
+				if (!isAscending)
+				{
+					beginIndexAsc = i;
+					beginFound = true;
+					isAscending = true;
+				}
+
+				endIndexAsc = i + 1;
+			}
+			else
+			{
+				isAscending = false;
+
+				if (beginFound)
+					endFound = true;
+			}
+
+			if (beginFound && endFound)
+			{
+				get_w_from_diapason(beginIndexAsc, endIndexAsc);
+				isAscending = false;
+			}
+		}
+
+		beginFound = endFound = false;
+
+		for (size_t i = 0; i < n; ++i)
+		{
+			if (y[i + 1] < y[i])
+			{
+				if (!isDescending)
+				{
+					beginIndexDes = i;
+					beginFound = true;
+					isDescending = true;
+				}
+
+				endIndexDes = i + 1;
+			}
+			else
+			{
+				isDescending = false;
+
+				if (beginFound)
+					endFound = true;
+			}
+
+			if (beginFound && endFound)
+			{
+				get_w_from_diapason(beginIndexDes, endIndexDes);
+				isDescending = false;
+			}
+		}
+	}
+	void get_w_from_diapason(size_t beginIndex, size_t endIndex)
+	{
+
+	}
 	bool get_m()
 	{
 		size_t n{ grid.get_n() };
