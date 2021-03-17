@@ -7,7 +7,7 @@ struct HermiteSplineInterpolatorP
 {
 	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
-		initialized{ false }, isWeights{ false }, weightsCalculating{ false }
+		initialized{ false }, isWeights{ false }, weightsCalculating{ true }
 	{}
 
 	bool initializeGrid()
@@ -156,17 +156,18 @@ struct HermiteSplineInterpolatorP
 		size_t n{ grid.get_n() };
 		std::vector<double> a, b, c, d;
 
-		if (weightsCalculating)
-		{
-			get_w();
-			isWeights = true;
-		}
-
 		try
 		{
 			m.resize(n);
-			if(!isWeights)
+			if (!isWeights)
+			{
+				if (weightsCalculating)
+					get_w();
+
 				w = std::move(std::vector<double>(n - 1, 1.0));
+
+				isWeights = true;
+			}				
 			a.resize(n);
 			b.resize(n);
 			c.resize(n);
@@ -309,6 +310,14 @@ bool HermiteSplineInterpolator::isInitialized()
 	return imp->initialized;
 }
 
+void HermiteSplineInterpolator::reset()
+{
+	imp->initialized = false;
+	imp->isDerivatives = false;
+	imp->isWeights = false;
+	imp->weightsCalculating = true;
+}
+
 void HermiteSplineInterpolator::setErrorsHandlerDelegate(std::function<void(void* object)> _delegate)
 {
 	imp->errorsHandler.setErrorsHandlerDelegate(_delegate);
@@ -330,16 +339,8 @@ void HermiteSplineInterpolator::setWeights(const std::vector<double>& w)
 
 void HermiteSplineInterpolator::setWeights(std::vector<double>&& w)
 {
-	try
-	{
-		imp->w = std::move(w);
-		imp->isWeights = true;
-	}
-	catch (std::bad_alloc& ex)
-	{
-		(void)ex;
-		imp->errorsHandler.pushBackError("cannot set weights, bad_alloc");
-	}
+	imp->w = std::move(w);
+	imp->isWeights = true;
 }
 
 void HermiteSplineInterpolator::setWeightsCalculating(bool value)

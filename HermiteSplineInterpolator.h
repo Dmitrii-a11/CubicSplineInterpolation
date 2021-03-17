@@ -20,6 +20,7 @@ public:
 	void setBoundaryConditions(double der_a, double der_b);
 	void initialize();
 	bool isInitialized();
+	void reset();
 	void setErrorsHandlerDelegate(std::function<void(void* object)> _delegate);
 	void setWeights(const std::vector<double>& w);
 	void setWeights(std::vector<double>&& w);
