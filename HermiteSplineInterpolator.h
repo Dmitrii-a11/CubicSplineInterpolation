@@ -7,6 +7,16 @@
 
 struct HermiteSplineInterpolatorP;
 
+namespace DefaultValues
+{
+	const double MIN_WEIGHT = 1E-6;
+	const double DEFAULT_WEIGHT = 1.0;
+	const double C_PARAMETER = 1.0;
+	const double BETA_PARAMETER = 1.0;
+	const double MIN_C_PARAMETER = 1.0;
+	const double MIN_BETA_PARAMETER = 0.0;
+};
+
 class HermiteSplineInterpolator : public Iinterpolator
 {
 public:
@@ -25,6 +35,8 @@ public:
 	void setWeights(const std::vector<double>& w);
 	void setWeights(std::vector<double>&& w);
 	void setWeightsCalculating(bool value);
+	void setWeightsParameters(double c, double beta,
+		                      double minWeightValue = DefaultValues::MIN_WEIGHT);
 
 private:
 	HermiteSplineInterpolatorP* imp;

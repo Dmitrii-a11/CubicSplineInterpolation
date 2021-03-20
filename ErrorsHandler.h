@@ -28,6 +28,14 @@ public:
 	{
 		errors.emplace_back(std::move(error));
 	}
+	std::string getLastError() const
+	{
+		return errors.size() > 0 ? errors[errors.size() - 1] : "";
+	}
+	size_t errorsCount() const
+	{
+		return errors.size();
+	}
 
 private:
 	std::function<void(void*)> errorsHandlerDelegate;

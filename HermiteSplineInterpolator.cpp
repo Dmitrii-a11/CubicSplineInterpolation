@@ -7,7 +7,8 @@ struct HermiteSplineInterpolatorP
 {
 	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
-		initialized{ false }, isWeights{ false }, weightsCalculating{ true }
+		initialized{ false }, isWeights{ false }, weightsCalculating{ false },
+		cParameter{ 1.0 }, betaParameter{ 1.0 }, minWeightValue{ DefaultValues::MIN_WEIGHT }
 	{}
 
 	bool initializeGrid()
@@ -37,6 +38,33 @@ struct HermiteSplineInterpolatorP
 
 		return true;
 	}
+	bool checkWeightsParameters()
+	{
+		size_t lastErrorsCount{ errorsHandler.errorsCount() };
+
+		if (minWeightValue <= 0.0)
+		{
+			errorsHandler.pushBackError(
+				"fail at setting minimum weight value: "
+				"the value of minimum weight must be positive");
+		}
+
+		if (cParameter < DefaultValues::MIN_C_PARAMETER)
+		{
+			errorsHandler.pushBackError(
+				"fail at setting 'c' parameter for weight calculating: "
+				"'c' must be gerater or equal " + std::to_string(DefaultValues::MIN_C_PARAMETER));
+		}
+
+		if (betaParameter < DefaultValues::MIN_BETA_PARAMETER)
+		{
+			errorsHandler.pushBackError(
+				"fail at setting 'beta' parameter for weight calculating: "
+				"'beta' must be greater or equal " + std::to_string(DefaultValues::MIN_BETA_PARAMETER));
+		}
+
+		return lastErrorsCount == errorsHandler.errorsCount();
+	}
 	void initialize()
 	{
 		if (initialized)
@@ -49,6 +77,12 @@ struct HermiteSplineInterpolatorP
 			return;
 		}
 
+		if (!initializeGrid())
+		{
+			errorsHandler.invoke(&errorsHandler);
+			return;
+		}
+
 		if (grid.get_x().size() != y.size())
 		{
 			errorsHandler.pushBackError("x size and y size do not match");
@@ -56,13 +90,13 @@ struct HermiteSplineInterpolatorP
 			return;
 		}
 
-		if (!initializeGrid())
+		initializeBC();
+
+		if (!checkWeightsParameters())
 		{
 			errorsHandler.invoke(&errorsHandler);
 			return;
 		}
-
-		initializeBC();
 
 		if (!get_m())
 		{
@@ -88,6 +122,7 @@ struct HermiteSplineInterpolatorP
 		size_t beginIndexAsc{ 0 }, beginIndexDes{ 0 }, endIndexAsc{ 0 }, endIndexDes{ 0 };
 		bool isAscending{ false }, isDescending{ false }, beginFound{ false }, endFound{ false };
 		size_t n{ grid.get_n() - 1 };
+		size_t gridSize{ n + 1 };
 
 		for (size_t i = 0; i < n; ++i)
 		{
@@ -110,9 +145,14 @@ struct HermiteSplineInterpolatorP
 					endFound = true;
 			}
 
+			if (beginFound && i == n - 1)
+				endFound = true;
+
 			if (beginFound && endFound)
 			{
-				get_w_from_diapason(beginIndexAsc, endIndexAsc);
+				if (endIndexAsc - beginIndexAsc + 1 >= 3.0)// for calculating the weights it is needed at least 3 points
+					get_w_from_diapason(beginIndexAsc, endIndexAsc);
+
 				isAscending = false;
 			}
 		}
@@ -140,16 +180,76 @@ struct HermiteSplineInterpolatorP
 					endFound = true;
 			}
 
+			if (beginFound && i == n - 1)
+				endFound = true;
+
 			if (beginFound && endFound)
 			{
-				get_w_from_diapason(beginIndexDes, endIndexDes);
+				if (endIndexDes - beginIndexDes + 1 >= 3.0)// for calculating the weights it is needed at least 3 points
+					get_w_from_diapason(beginIndexDes, endIndexDes);
+
 				isDescending = false;
 			}
 		}
 	}
 	void get_w_from_diapason(size_t beginIndex, size_t endIndex)
 	{
+		const auto& h = grid.get_h();
+		size_t n{ endIndex - 1 };
 
+		w[beginIndex] = pow((1.0 + cParameter * pow((y[beginIndex + 1] - y[beginIndex]) / h[beginIndex], 2.0)), -betaParameter);
+
+		for (size_t i = ++beginIndex; i < n; ++i)
+		{
+			w[i]= pow((1.0 + cParameter * pow((y[beginIndex + 1] - y[beginIndex]) / h[beginIndex], 2.0)), -betaParameter);
+
+			double left{ 0.0 }, right{ 0.0 };// left and right sides of inequality
+			double df_left{ 0.0 }, df_right{ 0.0 };
+			bool first_success{ false }, second_success{ false };// conditions of the first and the second inequalities
+			
+			df_left = ((y[i] - y[i - 1]) / h[i - 1]) / ((y[i + 1] - y[i]) / h[i]);
+			df_right = ((y[i + 1] - y[i]) / h[i]) / ((y[i] - y[i - 1]) / h[i - 1]);
+
+			left = h[i] / h[i - 1];
+			right = df_right - 2.0;
+
+			if (left >= right)
+				first_success = true;
+
+			left = 1.0 / left;
+			right = df_left;
+
+			if (left >= right)
+				second_success = true;
+
+			if (first_success && second_success)
+				continue;
+
+			first_success = second_success = false;
+
+			left = (w[i - 1] * h[i]) / (w[i] * h[i - 1]);
+			right = df_right - 2.0;
+
+			if (left >= right)
+				first_success = true;
+
+			left = 1.0 / left;
+			right = df_left - 2.0;
+
+			if (left >= right)
+				second_success = true;
+
+			left = w[i - 1] * h[i] / h[i - 1];
+			right = 1.0 / right;
+
+			if (!first_success)
+				w[i] = (w[i - 1] * h[i]) / (h[i - 1] * (df_right - 2.0));
+			if (!second_success)
+				w[i] = (w[i - 1] * h[i] / h[i - 1]) * (df_left - 2.0);
+
+			if (w[i] < minWeightValue)
+				w[i] = minWeightValue;
+		}
 	}
 	bool get_m()
 	{
@@ -159,15 +259,7 @@ struct HermiteSplineInterpolatorP
 		try
 		{
 			m.resize(n);
-			if (!isWeights)
-			{
-				if (weightsCalculating)
-					get_w();
-
-				w = std::move(std::vector<double>(n - 1, 1.0));
-
-				isWeights = true;
-			}				
+			w = std::move(std::vector<double>(n - 1, DefaultValues::DEFAULT_WEIGHT));			
 			a.resize(n);
 			b.resize(n);
 			c.resize(n);
@@ -179,6 +271,14 @@ struct HermiteSplineInterpolatorP
 			errorsHandler.pushBackError("cannot initialize ermit spline data, bad_alloc");
 
 			return false;
+		}
+
+		if (!isWeights)
+		{
+			if (weightsCalculating)
+				get_w();
+
+			isWeights = true;
 		}
 
 		createCoefficients(a, b, c, d);
@@ -232,6 +332,7 @@ struct HermiteSplineInterpolatorP
 	bool isDerivatives;
 	bool initialized;
 	bool isWeights, weightsCalculating;
+	double cParameter, betaParameter, minWeightValue;
 };
 
 HermiteSplineInterpolator::HermiteSplineInterpolator()
@@ -346,4 +447,12 @@ void HermiteSplineInterpolator::setWeights(std::vector<double>&& w)
 void HermiteSplineInterpolator::setWeightsCalculating(bool value)
 {
 	imp->weightsCalculating = value;
+}
+
+void HermiteSplineInterpolator::setWeightsParameters(double c, double beta, double minWeightValue)
+{
+	//imp->setWeightsParatemers(c, beta, minWeightValue);
+	imp->cParameter = c;
+	imp->betaParameter = beta;
+	imp->minWeightValue = minWeightValue;
 }
