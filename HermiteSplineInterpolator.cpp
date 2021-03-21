@@ -368,6 +368,8 @@ double HermiteSplineInterpolator::interpolate(double _x)
 				return imp->y[0];
 			if (_x == x[n - 1])
 				return imp->y[n - 1];
+			if (imp->y[i] == imp->y[i + 1])
+				return imp->y[i];
 
 			t = (_x - x[i]) / h[i];
 
