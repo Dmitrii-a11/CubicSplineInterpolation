@@ -194,15 +194,13 @@ struct HermiteSplineInterpolatorP
 	}
 	void get_w_from_diapason(size_t beginIndex, size_t endIndex)
 	{
-		const auto& h = grid.get_h();
+		const auto& h{ grid.get_h() };
 		size_t n{ endIndex - 1 };
 
 		w[beginIndex] = pow((1.0 + cParameter * pow((y[beginIndex + 1] - y[beginIndex]) / h[beginIndex], 2.0)), -betaParameter);
 
-		for (size_t i = ++beginIndex; i < n; ++i)
+		for (size_t i = ++beginIndex; i <= n; ++i)
 		{
-			w[i]= pow((1.0 + cParameter * pow((y[beginIndex + 1] - y[beginIndex]) / h[beginIndex], 2.0)), -betaParameter);
-
 			double left{ 0.0 }, right{ 0.0 };// left and right sides of inequality
 			double df_left{ 0.0 }, df_right{ 0.0 };
 			bool first_success{ false }, second_success{ false };// conditions of the first and the second inequalities
@@ -217,33 +215,19 @@ struct HermiteSplineInterpolatorP
 				first_success = true;
 
 			left = 1.0 / left;
-			right = df_left;
-
-			if (left >= right)
-				second_success = true;
-
-			if (first_success && second_success)
-				continue;
-
-			first_success = second_success = false;
-
-			left = (w[i - 1] * h[i]) / (w[i] * h[i - 1]);
-			right = df_right - 2.0;
-
-			if (left >= right)
-				first_success = true;
-
-			left = 1.0 / left;
 			right = df_left - 2.0;
 
 			if (left >= right)
 				second_success = true;
 
-			left = w[i - 1] * h[i] / h[i - 1];
-			right = 1.0 / right;
+			if (first_success && second_success)
+			{
+				w[i] = w[i - 1];
+				continue;
+			}
 
 			if (!first_success)
-				w[i] = (w[i - 1] * h[i]) / (h[i - 1] * (df_right - 2.0));
+				w[i] = w[i - 1] * h[i] / (h[i - 1] * (df_right - 2.0));
 			if (!second_success)
 				w[i] = (w[i - 1] * h[i] / h[i - 1]) * (df_left - 2.0);
 
@@ -373,7 +357,7 @@ double HermiteSplineInterpolator::interpolate(double _x)
 		size_t n{ x.size() };
 		double t{ 0.0 };
 
-		if (_x<x[0] || _x>x[n - 1])
+		if (_x < x[0] || _x > x[n - 1])
 			return 0.0;
 
 		for (size_t i = 0; i < n - 1; ++i)
@@ -387,7 +371,7 @@ double HermiteSplineInterpolator::interpolate(double _x)
 
 			t = (_x - x[i]) / h[i];
 
-			return pow((1.0 - t), 2) * (1 + 2.0 * t) * imp->y[i] + pow(t, 2) * (3.0 - 2.0 * t) * imp->y[i + 1] + t * pow((1.0 - t), 2) * h[i] * imp->m[i] - pow(t, 2) * (1.0 - t) * h[i] * imp->m[i + 1];
+			return pow((1.0 - t), 2.0) * (1.0 + 2.0 * t) * imp->y[i] + pow(t, 2.0) * (3.0 - 2.0 * t) * imp->y[i + 1] + t * pow((1.0 - t), 2.0) * h[i] * imp->m[i] - pow(t, 2.0) * (1.0 - t) * h[i] * imp->m[i + 1];
 		}
 	}
 
@@ -416,7 +400,7 @@ void HermiteSplineInterpolator::reset()
 	imp->initialized = false;
 	imp->isDerivatives = false;
 	imp->isWeights = false;
-	imp->weightsCalculating = true;
+	imp->weightsCalculating = false;
 }
 
 void HermiteSplineInterpolator::setErrorsHandlerDelegate(std::function<void(void* object)> _delegate)
