@@ -8,7 +8,8 @@ struct HermiteSplineInterpolatorP
 	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
 		initialized{ false }, isWeights{ false }, weightsCalculating{ false },
-		cParameter{ 1.0 }, betaParameter{ 1.0 }, minWeightValue{ DefaultValues::MIN_WEIGHT }
+		cParameter{ 1.0 }, betaParameter{ 1.0 },
+		minWeightValue{ HermiteSplineDefaultValues::MIN_WEIGHT }
 	{}
 
 	bool initializeGrid()
@@ -49,18 +50,20 @@ struct HermiteSplineInterpolatorP
 				"the value of minimum weight must be positive");
 		}
 
-		if (cParameter < DefaultValues::MIN_C_PARAMETER)
+		if (cParameter < HermiteSplineDefaultValues::MIN_C_PARAMETER)
 		{
 			errorsHandler.pushBackError(
 				"fail at setting 'c' parameter for weight calculating: "
-				"'c' must be gerater or equal " + std::to_string(DefaultValues::MIN_C_PARAMETER));
+				"'c' must be gerater or equal " +
+				std::to_string(HermiteSplineDefaultValues::MIN_C_PARAMETER));
 		}
 
-		if (betaParameter < DefaultValues::MIN_BETA_PARAMETER)
+		if (betaParameter < HermiteSplineDefaultValues::MIN_BETA_PARAMETER)
 		{
 			errorsHandler.pushBackError(
 				"fail at setting 'beta' parameter for weight calculating: "
-				"'beta' must be greater or equal " + std::to_string(DefaultValues::MIN_BETA_PARAMETER));
+				"'beta' must be greater or equal " + 
+				std::to_string(HermiteSplineDefaultValues::MIN_BETA_PARAMETER));
 		}
 
 		return lastErrorsCount == errorsHandler.errorsCount();
@@ -243,7 +246,21 @@ struct HermiteSplineInterpolatorP
 		try
 		{
 			m.resize(n);
-			w = std::move(std::vector<double>(n - 1, DefaultValues::DEFAULT_WEIGHT));			
+			if (!isWeights)
+			{
+				w = std::move(std::vector<double>(n - 1,
+					HermiteSplineDefaultValues::DEFAULT_WEIGHT)
+						     );
+				isWeights = true;
+			}
+			else
+			{
+				if (w.size() != n)
+				{
+					errorsHandler.pushBackError("wights count does not equal to grid size");
+					return false;
+				}
+			}
 			a.resize(n);
 			b.resize(n);
 			c.resize(n);
@@ -257,13 +274,8 @@ struct HermiteSplineInterpolatorP
 			return false;
 		}
 
-		if (!isWeights)
-		{
-			if (weightsCalculating)
-				get_w();
-
-			isWeights = true;
-		}
+		if (weightsCalculating)
+			get_w();
 
 		createCoefficients(a, b, c, d);
 		TDM_algorithm.setBounds(der_a, der_b);
@@ -435,7 +447,6 @@ void HermiteSplineInterpolator::setWeightsCalculating(bool value)
 
 void HermiteSplineInterpolator::setWeightsParameters(double c, double beta, double minWeightValue)
 {
-	//imp->setWeightsParatemers(c, beta, minWeightValue);
 	imp->cParameter = c;
 	imp->betaParameter = beta;
 	imp->minWeightValue = minWeightValue;
