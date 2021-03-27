@@ -372,8 +372,8 @@ inline double HermiteSplineInterpolator::interpolate(double _x)
 		const std::vector<double>& h{ imp->grid.get_h() };
 		size_t n{ x.size() };
 		double t{ 0.0 };
-		auto upperBountIter{ std::upper_bound(x.begin(), x.end(), _x) };
-		auto index{ std::distance(x.begin(), upperBountIter) };
+		auto upperBoundIter{ std::upper_bound(x.begin(), x.end(), _x) };
+		auto index{ std::distance(x.begin(), upperBoundIter) };
 
 		if (_x < x[0] || _x > x[n - 1])// if _x is not in [a, b] => exit
 			return imp->nullInterpValue;
