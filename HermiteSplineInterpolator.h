@@ -21,7 +21,6 @@ namespace HermiteSplineDefaultValues
 class HermiteSplineInterpolator : public Iinterpolator
 {
 public:
-
 	HermiteSplineInterpolator();
 	virtual ~HermiteSplineInterpolator();
 

@@ -376,7 +376,7 @@ inline double HermiteSplineInterpolator::interpolate(double _x)
 		auto index{ std::distance(x.begin(), upperBountIter) };
 
 		if (_x < x[0] || _x > x[n - 1])// if _x is not in [a, b] => exit
-			return 0.0;
+			return imp->nullInterpValue;
 
 		if (index == n)
 			return imp->y[n - 1];
@@ -386,7 +386,7 @@ inline double HermiteSplineInterpolator::interpolate(double _x)
 		return pow((1.0 - t), 2.0) * (1.0 + 2.0 * t) * imp->y[index - 1] + pow(t, 2.0) * (3.0 - 2.0 * t) * imp->y[index] + t * pow((1.0 - t), 2.0) * h[index - 1] * imp->m[index - 1] - pow(t, 2.0) * (1.0 - t) * h[index - 1] * imp->m[index];
 	}
 
-	return 0.0;
+	return imp->nullInterpValue;
 }
 
 void HermiteSplineInterpolator::setBoundaryConditions(double der_a, double der_b)
