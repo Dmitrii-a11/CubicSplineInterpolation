@@ -15,6 +15,7 @@ namespace HermiteSplineDefaultValues
 	const double BETA_PARAMETER = 1.0;
 	const double MIN_C_PARAMETER = 1.0;
 	const double MIN_BETA_PARAMETER = 0.0;
+	const double NULL_INTERP_VALUE = 0.0;
 }
 
 class HermiteSplineInterpolator : public Iinterpolator
@@ -26,7 +27,7 @@ public:
 
 	virtual void set_x(const std::vector<double>& x) override;
 	virtual void set_y(const std::vector<double>& y) override;
-	virtual double interpolate(double x) override;
+	virtual inline double interpolate(double x) override;
 
 	void setBoundaryConditions(double der_a, double der_b);
 	void initialize();
@@ -34,10 +35,13 @@ public:
 	void reset();
 	void setErrorsHandlerDelegate(std::function<void(void* object)> _delegate);
 	void setWeights(const std::vector<double>& w);
-	void setWeights(std::vector<double>&& w);
 	void setWeightsCalculating(bool value);
+	bool isWeightsCalculating() const;
 	void setWeightsParameters(double c, double beta,
 		                      double minWeightValue = HermiteSplineDefaultValues::MIN_WEIGHT);
+	double getMinWeightsValue() const;
+	void setNullInterpolateValue(double value);
+	double getNullInterpValue() const;
 
 private:
 	HermiteSplineInterpolatorP* imp;

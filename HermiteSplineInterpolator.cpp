@@ -3,13 +3,16 @@
 #include "ErrorsHandler.h"
 #include "TDMA.h"
 
+#include <algorithm>
+
 struct HermiteSplineInterpolatorP
 {
 	HermiteSplineInterpolatorP() :
 		der_a{ 0.0 }, der_b{ 0.0 }, isDerivatives{ false },
 		initialized{ false }, isWeights{ false }, weightsCalculating{ false },
 		cParameter{ 1.0 }, betaParameter{ 1.0 },
-		minWeightValue{ HermiteSplineDefaultValues::MIN_WEIGHT }
+		minWeightValue{ HermiteSplineDefaultValues::MIN_WEIGHT },
+		nullInterpValue{ HermiteSplineDefaultValues::NULL_INTERP_VALUE }
 	{}
 
 	bool initializeGrid()
@@ -329,6 +332,7 @@ struct HermiteSplineInterpolatorP
 	bool initialized;
 	bool isWeights, weightsCalculating;
 	double cParameter, betaParameter, minWeightValue;
+	double nullInterpValue;
 };
 
 HermiteSplineInterpolator::HermiteSplineInterpolator()
@@ -360,7 +364,7 @@ void HermiteSplineInterpolator::set_y(const std::vector<double>& y)
 	}
 }
 
-double HermiteSplineInterpolator::interpolate(double _x)
+inline double HermiteSplineInterpolator::interpolate(double _x)
 {
 	if (imp->initialized)
 	{
@@ -368,23 +372,18 @@ double HermiteSplineInterpolator::interpolate(double _x)
 		const std::vector<double>& h{ imp->grid.get_h() };
 		size_t n{ x.size() };
 		double t{ 0.0 };
+		auto upperBountIter{ std::upper_bound(x.begin(), x.end(), _x) };
+		auto index{ std::distance(x.begin(), upperBountIter) };
 
-		if (_x < x[0] || _x > x[n - 1])
+		if (_x < x[0] || _x > x[n - 1])// if _x is not in [a, b] => exit
 			return 0.0;
 
-		for (size_t i = 0; i < n - 1; ++i)
-		{
-			if (_x > x[i + 1])
-				continue;
-			if (_x == x[0])
-				return imp->y[0];
-			if (_x == x[n - 1])
-				return imp->y[n - 1];
+		if (index == n)
+			return imp->y[n - 1];
 
-			t = (_x - x[i]) / h[i];
+		t = (_x - x[index - 1]) / h[index - 1];
 
-			return pow((1.0 - t), 2.0) * (1.0 + 2.0 * t) * imp->y[i] + pow(t, 2.0) * (3.0 - 2.0 * t) * imp->y[i + 1] + t * pow((1.0 - t), 2.0) * h[i] * imp->m[i] - pow(t, 2.0) * (1.0 - t) * h[i] * imp->m[i + 1];
-		}
+		return pow((1.0 - t), 2.0) * (1.0 + 2.0 * t) * imp->y[index - 1] + pow(t, 2.0) * (3.0 - 2.0 * t) * imp->y[index] + t * pow((1.0 - t), 2.0) * h[index - 1] * imp->m[index - 1] - pow(t, 2.0) * (1.0 - t) * h[index - 1] * imp->m[index];
 	}
 
 	return 0.0;
@@ -434,15 +433,14 @@ void HermiteSplineInterpolator::setWeights(const std::vector<double>& w)
 	}
 }
 
-void HermiteSplineInterpolator::setWeights(std::vector<double>&& w)
-{
-	imp->w = std::move(w);
-	imp->isWeights = true;
-}
-
 void HermiteSplineInterpolator::setWeightsCalculating(bool value)
 {
 	imp->weightsCalculating = value;
+}
+
+bool HermiteSplineInterpolator::isWeightsCalculating() const
+{
+	return imp->weightsCalculating;
 }
 
 void HermiteSplineInterpolator::setWeightsParameters(double c, double beta, double minWeightValue)
@@ -450,4 +448,19 @@ void HermiteSplineInterpolator::setWeightsParameters(double c, double beta, doub
 	imp->cParameter = c;
 	imp->betaParameter = beta;
 	imp->minWeightValue = minWeightValue;
+}
+
+double HermiteSplineInterpolator::getMinWeightsValue() const
+{
+	return imp->minWeightValue;
+}
+
+void HermiteSplineInterpolator::setNullInterpolateValue(double value)
+{
+	imp->nullInterpValue = value;
+}
+
+double HermiteSplineInterpolator::getNullInterpValue() const
+{
+	return imp->nullInterpValue;
 }
