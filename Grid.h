@@ -25,6 +25,11 @@ public:
 		return InitGridErrors::NO_ERRORS;
 	}
 
+	void set_x(std::vector<double>&& _x) noexcept
+	{
+		x = std::move(_x);
+	}
+
 	InitGridErrors initializeGrid();
 
 	const std::vector<double>& get_x() const

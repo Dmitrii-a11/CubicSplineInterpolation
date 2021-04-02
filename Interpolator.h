@@ -3,14 +3,16 @@
 
 #include <vector>
 
-class Iinterpolator
+class Interpolator
 {
 public:
-	virtual ~Iinterpolator()
+	virtual ~Interpolator()
 	{}
 
 	virtual void set_x(const std::vector<double>& x) = 0;
 	virtual void set_y(const std::vector<double>& y) = 0;
+	virtual void set_x(std::vector<double>&& x) {}
+	virtual void set_y(std::vector<double>&& y) {}
 	virtual double interpolate(double) = 0;
 };
 

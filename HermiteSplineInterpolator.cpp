@@ -364,6 +364,16 @@ void HermiteSplineInterpolator::set_y(const std::vector<double>& y)
 	}
 }
 
+void HermiteSplineInterpolator::set_x(std::vector<double>&& x) noexcept
+{
+	imp->grid.set_x(std::move(x));
+}
+
+void HermiteSplineInterpolator::set_y(std::vector<double>&& y) noexcept
+{
+	imp->y = std::move(y);
+}
+
 inline double HermiteSplineInterpolator::interpolate(double _x)
 {
 	if (imp->initialized)
@@ -431,6 +441,11 @@ void HermiteSplineInterpolator::setWeights(const std::vector<double>& w)
 		(void)ex;
 		imp->errorsHandler.pushBackError("cannot set weights, bad_alloc");
 	}
+}
+
+void HermiteSplineInterpolator::setWeights(std::vector<double>&& w) noexcept
+{
+	imp->w = std::move(w);
 }
 
 void HermiteSplineInterpolator::setWeightsCalculating(bool value)

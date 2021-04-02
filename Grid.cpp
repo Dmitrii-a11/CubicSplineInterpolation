@@ -1,5 +1,6 @@
 #include "Grid.h"
 
+
 Grid::Grid::InitGridErrors Grid::Grid::initializeGrid()
 {
 	n = x.size();

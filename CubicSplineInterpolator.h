@@ -7,7 +7,7 @@
 
 struct CubicSplineInterpolatorP;
 
-class CubicSplineInterpolator : public Iinterpolator
+class CubicSplineInterpolator : public Interpolator
 {
 public:
 	CubicSplineInterpolator();
